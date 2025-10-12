@@ -7,3 +7,6 @@ stop:
 restart:
 	docker-compose down
 	docker-compose up -d
+
+dev-ui:
+	cd web-ui && make dev
