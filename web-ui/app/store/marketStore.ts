@@ -35,7 +35,7 @@ export const useMarketStore = create<MarketState>((set) => ({
     set({ isLoading: true, error: null, sector });
 
     try {
-      const response = await fetch("http://localhost:3000/api/analyze", {
+      const response = await fetch("http://localhost:5678/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
