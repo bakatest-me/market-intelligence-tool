@@ -1,0 +1,94 @@
+{
+  "uuid": "919f4cf0-6697-4ec1-8687-8efc6e5bb224",
+  "lastMigration": 33,
+  "name": "Mockoon",
+  "endpointPrefix": "",
+  "latency": 0,
+  "port": 3000,
+  "hostname": "",
+  "folders": [],
+  "routes": [
+    {
+      "uuid": "59adc3f2-126e-48d3-a7d7-74b799a4bd5e",
+      "type": "http",
+      "documentation": "",
+      "method": "post",
+      "endpoint": "api/analyze",
+      "responses": [
+        {
+          "uuid": "f4bb455b-ebcb-466a-8e2d-2eb2232bc165",
+          "body": "{\n  \"summary\": \"The AI for Healthcare sector is experiencing rapid growth and innovation. Recent developments show increased investment activity and technological breakthroughs. Market dynamics indicate strong potential for strategic investments, with emerging players disrupting traditional models. The sector is characterized by high growth potential, technological advancement, and increasing market adoption across various industries.\",\n  \"trends\": [\n    \"Rising adoption of AI and machine learning technologies in medical diagnostics and patient care\",\n    \"Increased focus on sustainability and ESG compliance driving innovation in healthcare delivery\",\n    \"Strategic partnerships between established hospitals and emerging health-tech startups\",\n    \"Growing demand for telemedicine and remote patient monitoring solutions\",\n    \"Expansion into emerging markets with localized healthcare solutions and services\"\n  ],\n  \"startups\": [\n    {\n      \"name\": \"InnovateTech AI\",\n      \"description\": \"Leading provider of AI-powered diagnostic solutions for healthcare, focusing on early disease detection and predictive analytics with proven ROI.\",\n      \"link\": \"https://example.com/innovatetech\"\n    },\n    {\n      \"name\": \"GreenScale Solutions\",\n      \"description\": \"Sustainable medical technology platform addressing key challenges in healthcare with eco-friendly innovations and circular economy approach.\",\n      \"link\": \"https://example.com/greenscale\"\n    },\n    {\n      \"name\": \"DataFlow Systems\",\n      \"description\": \"Real-time patient data analytics and intelligence platform for healthcare providers, serving Fortune 500 clients with enterprise-grade solutions.\",\n      \"link\": \"https://example.com/dataflow\"\n    },\n    {\n      \"name\": \"NextGen Dynamics\",\n      \"description\": \"Breakthrough technology in medical automation, recently raised Series B funding of $50M led by top-tier VCs.\",\n      \"link\": \"https://example.com/nextgen\"\n    },\n    {\n      \"name\": \"Quantum Edge\",\n      \"description\": \"Advanced optimization algorithms for hospital operations, achieving 40% efficiency improvements for clients.\",\n      \"link\": \"https://example.com/quantumedge\"\n    },\n    {\n      \"name\": \"CloudVista Platform\",\n      \"description\": \"Cloud-native infrastructure for healthcare applications, enabling scalable and secure deployment across medical facilities.\",\n      \"link\": \"https://example.com/cloudvista\"\n    }\n  ],\n  \"theses\": [\n    \"Digital transformation in healthcare presents significant opportunity for early-stage investments in platform technologies that enable industry-wide adoption\",\n    \"Sustainability-focused innovations in medical technology align with regulatory trends and corporate ESG mandates, creating defensible market positions\",\n    \"Integration of AI/ML capabilities into clinical workflows offers 10x productivity improvements, justifying premium valuations for category leaders\"\n  ]\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        }
+      ],
+      "responseMode": null,
+      "streamingMode": null,
+      "streamingInterval": 0
+    }
+  ],
+  "rootChildren": [
+    {
+      "type": "route",
+      "uuid": "59adc3f2-126e-48d3-a7d7-74b799a4bd5e"
+    }
+  ],
+  "proxyMode": false,
+  "proxyHost": "",
+  "proxyRemovePrefix": false,
+  "tlsOptions": {
+    "enabled": false,
+    "type": "CERT",
+    "pfxPath": "",
+    "certPath": "",
+    "keyPath": "",
+    "caPath": "",
+    "passphrase": ""
+  },
+  "cors": true,
+  "headers": [
+    {
+      "key": "Content-Type",
+      "value": "application/json"
+    },
+    {
+      "key": "Access-Control-Allow-Origin",
+      "value": "*"
+    },
+    {
+      "key": "Access-Control-Allow-Methods",
+      "value": "GET,POST,PUT,PATCH,DELETE,HEAD,OPTIONS"
+    },
+    {
+      "key": "Access-Control-Allow-Headers",
+      "value": "Content-Type, Origin, Accept, Authorization, Content-Length, X-Requested-With"
+    }
+  ],
+  "proxyReqHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "proxyResHeaders": [
+    {
+      "key": "",
+      "value": ""
+    }
+  ],
+  "data": [],
+  "callbacks": []
+}

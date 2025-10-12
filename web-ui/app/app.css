@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  /* Enhanced Dark Color Palette */
+  --color-background: #0a0e1a;
+  --color-foreground: #e2e8f0;
+  
+  --color-card: #111827;
+  --color-card-foreground: #f1f5f9;
+  
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+  
+  --color-secondary: #1e293b;
+  --color-secondary-foreground: #e2e8f0;
+  
+  --color-muted: #1e293b;
+  --color-muted-foreground: #94a3b8;
+  
+  --color-accent: #2563eb;
+  --color-accent-foreground: #ffffff;
+  
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  
+  --color-border: #1e293b;
+  --color-input: #1e293b;
+  --color-ring: #3b82f6;
+  
+  --radius: 0.75rem;
+  
+  /* Glow effects */
+  --glow-primary: 0 0 20px rgba(59, 130, 246, 0.3);
+  --glow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+@layer base {
+  * {
+    border-color: theme(colors.border);
+  }
+  
+  body {
+    background-color: theme(colors.background);
+    color: theme(colors.foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer utilities {
+  .glow {
+    box-shadow: var(--glow-primary);
+  }
+  
+  .card-glow {
+    box-shadow: var(--glow-card);
+  }
+  
+  .gradient-border {
+    position: relative;
+    background: linear-gradient(to right, #3b82f6, #8b5cf6);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+  }
+  
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 2px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+}
