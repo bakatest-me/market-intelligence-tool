@@ -1,4 +1,5 @@
 import { Loader2 } from "lucide-react";
+import { EmailSubscriber } from "~/components/EmailSubscriber";
 import { ResultsDisplay } from "~/components/ResultsDisplay";
 import { SearchBar } from "~/components/SearchBar";
 import { useMarketStore } from "~/store/marketStore";
@@ -70,6 +71,11 @@ export default function Home() {
             </p>
           </div>
         )}
+
+        {/* Email Subscriber */}
+        <div className="mt-16 sm:mt-24">
+          <EmailSubscriber />
+        </div>
       </div>
 
       {/* Footer */}
