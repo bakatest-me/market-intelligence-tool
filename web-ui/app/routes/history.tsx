@@ -1,16 +1,16 @@
 import {
+  BarChart3,
   ChevronLeft,
   ChevronRight,
-  Clock,
   History as HistoryIcon,
-  Trash2,
+  Loader2,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import { MarketResultCard } from "~/components/MarketResultCard";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { useMarketStore } from "~/store/marketStore";
+import type { MarketData } from "~/store/marketStore";
 import type { Route } from "./+types/history";
 
 export function meta({}: Route.MetaArgs) {
@@ -25,64 +25,170 @@ export function meta({}: Route.MetaArgs) {
 
 const ITEMS_PER_PAGE = 10;
 
+interface HistoryListItem {
+  id: number;
+  sector: string;
+}
+
+interface HistoryApiResponse {
+  code: number;
+  message: string;
+  data: HistoryListItem[];
+}
+
+interface HistoryDetailResponse {
+  data: MarketData;
+  sector: string;
+}
+
 export default function History() {
-  const { history, removeHistoryItem, clearHistory } = useMarketStore();
-  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(
-    history.length > 0 ? history[0].id : null
+  const [historyList, setHistoryList] = useState<HistoryListItem[]>([]);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<number | null>(
+    null
   );
+  const [selectedItem, setSelectedItem] = useState<{
+    sector: string;
+    data: MarketData;
+  } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingList, setIsLoadingList] = useState(true);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [totalPages, setTotalPages] = useState(1);
 
-  const selectedItem = history.find((item) => item.id === selectedHistoryId);
+  // Fetch history list from API
+  useEffect(() => {
+    const fetchHistoryList = async () => {
+      setIsLoadingList(true);
+      setError(null);
 
-  // Pagination calculations
-  const totalPages = Math.ceil(history.length / ITEMS_PER_PAGE);
-  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const endIndex = startIndex + ITEMS_PER_PAGE;
-  const paginatedHistory = history.slice(startIndex, endIndex);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/api/history?page=${currentPage}&perPage=${ITEMS_PER_PAGE}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch history");
+        }
+
+        const result: HistoryApiResponse = await response.json();
+
+        if (result.code === 200) {
+          setHistoryList(result.data);
+
+          // Calculate total pages (assuming we get less than ITEMS_PER_PAGE on last page)
+          // Note: API should ideally return total count, but we'll estimate based on response
+          if (result.data.length < ITEMS_PER_PAGE && currentPage > 1) {
+            setTotalPages(currentPage);
+          } else if (result.data.length === ITEMS_PER_PAGE) {
+            // There might be more pages, keep current totalPages or increment
+            setTotalPages(Math.max(totalPages, currentPage + 1));
+          }
+
+          // Auto-select first item if nothing is selected
+          if (result.data.length > 0 && !selectedHistoryId) {
+            setSelectedHistoryId(result.data[0].id);
+          }
+        } else {
+          throw new Error(result.message || "Failed to fetch history");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setIsLoadingList(false);
+      }
+    };
+
+    fetchHistoryList();
+  }, [currentPage]);
+
+  // Fetch history detail when an item is selected
+  useEffect(() => {
+    if (!selectedHistoryId) {
+      setSelectedItem(null);
+      return;
+    }
+
+    const fetchHistoryDetail = async () => {
+      setIsLoadingDetail(true);
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_BACKEND_URL}/41c11638-417b-4001-b5ab-7da151f94e16/api/history/${selectedHistoryId}`
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch history detail");
+        }
+        const result: HistoryDetailResponse = await response.json();
+        const selectedFromList = historyList.find(
+          (item) => item.id === selectedHistoryId
+        );
+
+        setSelectedItem({
+          sector: result?.sector || "",
+          data: result.data,
+        });
+      } catch (err) {
+        console.error("Error fetching history detail:", err);
+        setSelectedItem(null);
+      } finally {
+        setIsLoadingDetail(false);
+      }
+    };
+
+    fetchHistoryDetail();
+  }, [selectedHistoryId, historyList]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    // If the selected item is not on the new page, select the first item of the new page
-    const newPageItems = history.slice(
-      (page - 1) * ITEMS_PER_PAGE,
-      page * ITEMS_PER_PAGE
-    );
-    if (
-      selectedHistoryId &&
-      !newPageItems.find((item) => item.id === selectedHistoryId)
-    ) {
-      setSelectedHistoryId(newPageItems.length > 0 ? newPageItems[0].id : null);
-    }
+    setSelectedHistoryId(null);
+    setSelectedItem(null);
   };
 
-  const handleDelete = (id: string) => {
-    removeHistoryItem(id);
-    if (selectedHistoryId === id) {
-      const remainingHistory = history.filter((item) => item.id !== id);
-      setSelectedHistoryId(
-        remainingHistory.length > 0 ? remainingHistory[0].id : null
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/41c11638-417b-4001-b5ab-7da151f94e16/api/history/${id}`,
+        { method: "DELETE" }
       );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete history item");
+      }
+
+      // Refresh the list
+      setHistoryList((prev) => prev.filter((item) => item.id !== id));
+
+      if (selectedHistoryId === id) {
+        const remaining = historyList.filter((item) => item.id !== id);
+        setSelectedHistoryId(remaining.length > 0 ? remaining[0].id : null);
+      }
+    } catch (err) {
+      console.error("Error deleting history item:", err);
+      alert("Failed to delete history item");
     }
   };
 
-  const formatDate = (timestamp: number) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  const handleClearAll = async () => {
+    if (!confirm("Are you sure you want to clear all history?")) {
+      return;
+    }
 
-    if (diffInDays === 0) {
-      return `Today, ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    } else if (diffInDays === 1) {
-      return `Yesterday, ${date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
-    } else if (diffInDays < 7) {
-      return `${diffInDays} days ago`;
-    } else {
-      return date.toLocaleDateString([], {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      });
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}/api/history`,
+        { method: "DELETE" }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to clear history");
+      }
+
+      setHistoryList([]);
+      setSelectedHistoryId(null);
+      setSelectedItem(null);
+    } catch (err) {
+      console.error("Error clearing history:", err);
+      alert("Failed to clear history");
     }
   };
 
@@ -105,26 +211,32 @@ export default function History() {
               <Link to="/">
                 <Button variant="outline">Back to Home</Button>
               </Link>
-              {history.length > 0 && (
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (
-                      confirm("Are you sure you want to clear all history?")
-                    ) {
-                      clearHistory();
-                      setSelectedHistoryId(null);
-                    }
-                  }}
-                >
+              {/* {historyList.length > 0 && (
+                <Button variant="destructive" onClick={handleClearAll}>
                   Clear All
                 </Button>
-              )}
+              )} */}
             </div>
           </div>
         </header>
 
-        {history.length === 0 ? (
+        {/* Error State */}
+        {error && (
+          <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center mb-8">
+            <p className="text-destructive font-semibold mb-2">Error</p>
+            <p className="text-sm text-muted-foreground">{error}</p>
+          </div>
+        )}
+
+        {/* Loading State */}
+        {isLoadingList ? (
+          <div className="flex flex-col items-center justify-center py-24">
+            <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+            <p className="text-base text-muted-foreground">
+              Loading history...
+            </p>
+          </div>
+        ) : historyList.length === 0 ? (
           <div className="text-center py-24">
             <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-secondary mb-6">
               <HistoryIcon className="h-10 w-10 text-muted-foreground" />
@@ -145,43 +257,54 @@ export default function History() {
             <div className="lg:col-span-4 xl:col-span-3">
               <Card className="sticky top-4">
                 <CardHeader>
-                  <CardTitle className="text-lg">
-                    Recent Searches ({history.length})
-                  </CardTitle>
+                  <CardTitle className="text-lg">Recent Searches</CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="max-h-[calc(100vh-16rem)] overflow-y-auto">
-                    {paginatedHistory.map((item) => (
-                      <button
+                  <div className="max-h-[calc(100vh-16rem)] overflow-y-auto p-2 space-y-2">
+                    {historyList.map((item) => (
+                      <div
                         key={item.id}
                         onClick={() => setSelectedHistoryId(item.id)}
-                        className={`w-full text-left px-4 py-3 border-b border-border hover:bg-secondary/50 transition-colors ${
-                          selectedHistoryId === item.id ? "bg-secondary" : ""
+                        className={`relative group rounded-lg border transition-all cursor-pointer ${
+                          selectedHistoryId === item.id
+                            ? "border-primary bg-primary/5 shadow-sm"
+                            : "border-border bg-card hover:border-primary/50 hover:bg-secondary/30"
                         }`}
                       >
-                        <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start justify-between gap-2 p-3">
                           <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm truncate mb-1">
-                              {item.sector}
-                            </h3>
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {formatDate(item.timestamp)}
+                            <div className="flex items-center gap-2 mb-2">
+                              <div
+                                className={`h-2 w-2 rounded-full ${
+                                  selectedHistoryId === item.id
+                                    ? "bg-primary"
+                                    : "bg-muted-foreground/30"
+                                }`}
+                              />
+                              <h3 className="font-semibold text-sm truncate">
+                                {item.sector}
+                              </h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground pl-4">
+                              Analysis #{item.id}
                             </p>
                           </div>
-                          <Button
+                          {/* <Button
                             variant="ghost"
                             size="sm"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDelete(item.id);
                             }}
-                            className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                            className="h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-destructive hover:text-destructive-foreground"
                           >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button> */}
                         </div>
-                      </button>
+                        {selectedHistoryId === item.id && (
+                          <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary rounded-l-lg" />
+                        )}
+                      </div>
                     ))}
                   </div>
 
@@ -217,16 +340,25 @@ export default function History() {
 
             {/* Right Content - Result Display */}
             <div className="lg:col-span-8 xl:col-span-9">
-              {selectedItem ? (
+              {isLoadingDetail ? (
+                <div className="flex flex-col items-center justify-center h-96">
+                  <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+                  <p className="text-base text-muted-foreground">
+                    Loading details...
+                  </p>
+                </div>
+              ) : selectedItem ? (
                 <div className="animate-in fade-in duration-300">
-                  <div className="mb-4">
-                    <h2 className="text-2xl font-bold">
-                      {selectedItem.sector}
-                    </h2>
-                    <p className="text-sm text-muted-foreground">
-                      Analyzed on {formatDate(selectedItem.timestamp)}
-                    </p>
-                  </div>
+                  <Card className="mb-6">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+                        <BarChart3 className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+                        <span className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                          {selectedItem.sector}
+                        </span>
+                      </CardTitle>
+                    </CardHeader>
+                  </Card>
                   <MarketResultCard
                     data={selectedItem.data}
                     sector={selectedItem.sector}

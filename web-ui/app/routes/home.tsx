@@ -18,7 +18,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { isLoading, data, error, history } = useMarketStore();
+  const { isLoading, data, error } = useMarketStore();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
@@ -29,7 +29,7 @@ export default function Home() {
             <Link to="/history">
               <Button variant="outline" className="gap-2">
                 <History className="h-4 w-4" />
-                History {history.length > 0 && `(${history.length})`}
+                History
               </Button>
             </Link>
           </div>
