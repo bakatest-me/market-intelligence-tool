@@ -19,7 +19,7 @@ web-ui: http://localhost:3000
 
 
 Base prompt research
-```
+```md
 You are an investment analyst working for a Corporate Venture Capital (CVC) firm.
 Your task is to conduct rapid market intelligence research on a given sector.
 
@@ -43,6 +43,7 @@ Do not include commentary, markdown, or code fences — just the JSON object.
   "type": "object",
   "required": ["summary","trends","startups","theses"],
   "properties": {
+		"sector": { "type": "string" },
     "summary": { "type": "string" },
     "trends": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
     "startups": {
@@ -66,6 +67,7 @@ Do not include commentary, markdown, or code fences — just the JSON object.
 
 --- RESPONSE JSON FORMAT (exact keys only) ---
 {
+	"sector": "string",
   "summary": "string (2–3 sentences)",
   "trends": ["string", "string", "..."],
   "startups": [
@@ -88,3 +90,17 @@ Do not include commentary, markdown, or code fences — just the JSON object.
 - All strings must be plain text (escape quotes properly).
 ```
 
+
+
+### Database
+
+```sql
+CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE sector_reports (
+  id SERIAL PRIMARY KEY,
+  sector TEXT,
+  data JSONB,
+  embedding VECTOR(1536)
+);
+```
