@@ -1,7 +1,9 @@
-import { Loader2 } from "lucide-react";
+import { History, Loader2 } from "lucide-react";
+import { Link } from "react-router";
 import { EmailSubscriber } from "~/components/EmailSubscriber";
 import { ResultsDisplay } from "~/components/ResultsDisplay";
 import { SearchBar } from "~/components/SearchBar";
+import { Button } from "~/components/ui/button";
 import { useMarketStore } from "~/store/marketStore";
 import type { Route } from "./+types/home";
 
@@ -16,13 +18,21 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Home() {
-  const { isLoading, data, error } = useMarketStore();
+  const { isLoading, data, error, history } = useMarketStore();
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/20">
       <div className="container mx-auto px-4 py-8 sm:py-12 lg:py-16 max-w-7xl">
         {/* Header */}
         <header className="text-center mb-8 sm:mb-12 lg:mb-16">
+          <div className="flex justify-end mb-4">
+            <Link to="/history">
+              <Button variant="outline" className="gap-2">
+                <History className="h-4 w-4" />
+                History {history.length > 0 && `(${history.length})`}
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
             AI Market Intelligence Tool
           </h1>
