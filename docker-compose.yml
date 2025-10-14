@@ -1,6 +1,19 @@
 version: "3.8"
 
 services:
+  web-ui:
+    platform: linux/amd64
+    build:
+      context: ./web-ui
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    volumes:
+      - ./web-ui:/app
+    depends_on:
+      - db
+      - n8n
+
   db:
     image: pgvector/pgvector:pg17
     env_file:

@@ -57,12 +57,19 @@ Do not include commentary, markdown, or code fences — just the JSON object.
 
 ---
 
-### Guidelines
-- The model must return exactly one JSON object that **validates against the JSON Schema below**.
-- Do NOT include any extra text before or after the JSON.
-- Do NOT include markdown code fences.
-- Do NOT output null values. If a value is not available, use an empty string `""` or empty array `[]`.
-- Use valid URLs for links when known; otherwise set `"link": ""`.
-- Do NOT include trailing commas or comments.
-- The `startups` array must contain between 5 and 10 objects if possible. If fewer than 5 credible companies exist, include as many as possible but not zero.
-- All strings must be plain text (escape quotes properly).
+### Validation Rules
+
+- The model must output **exactly one valid JSON object** that conforms to the provided JSON Schema.  
+- **No extra text** is allowed before or after the JSON — no explanations, commentary, or markdown formatting.  
+- **Do not include code fences** (``` or ```json).  
+- Use **standard ASCII double quotes (`"`) only** — never smart quotes (“ or ”).  
+- Every key and value must strictly follow the schema and use proper JSON escaping for quotes.  
+- Do **not** include trailing commas, comments, or null values.  
+- If data is missing or unavailable:
+  - Use an empty string `""` for text values.
+  - Use an empty array `[]` for list values.
+- The `startups` array must include **between 5 and 10** items when possible (minimum 1).  
+- Each startup object must include `"name"`, `"description"`, and `"link"` keys.  
+- URLs must be valid and start with `https://` when known; otherwise use an empty string `""`.  
+- All output strings must be **plain text** (no markdown, HTML, or special characters).  
+- The final output must be **valid JSON**, fully parseable by any standard JSON parser.  
