@@ -1,3 +1,48 @@
+### Prompt engineering choices & reasoning
+
+At the beginning, I was confused about how the Sector search system differs from chat direct with ChatGPT, and discovered that having a system with clearly defined foundational prompts makes it easier for users to access specific use cases.
+
+
+#### Key Idea feature sector search
+1. Input keyword
+2. AI Analyze
+3. Output
+
+#### Key Idea Email subscribe (Test)
+1. Get top 10 news data from public API (finnhub.io)
+2. AI analyze data
+3. Output
+4. Send to Email
+
+### Prompt engineering choices and reasoning
+
+**Defining the Role**
+- Set AI context and persona
+
+**Research the sector from input data**
+- I want this to plug other module like n8n or a frontend query box
+
+**Research requirment scope**
+- Make AI clearly scope to research
+
+**Validation rules**
+- Force AI to make output format 
+- JSON because i want to use in other programing process (API, Database etc.)
+- Markdown because it's able convert to HTML for Email
+
+
+### Fist prompt starts from simplicity by
+```md
+You are an investment analyst for a Corporate Venture Capital (CVC) firm.
+Research the sector: {{user_query}}.
+Summarize:
+1. Key market trends (3–5 bullets)
+2. 5–10 notable startups with short descriptions
+3. Potential investment themes or thesis for CVC investment
+```
+
+### Sector search prompt (Feature Sector search)
+```md
 You are an investment analyst working for a Corporate Venture Capital (CVC) firm.
 Your task is to conduct rapid market intelligence research on a given sector.
 
@@ -73,3 +118,55 @@ Do not include commentary, markdown, or code fences — just the JSON object.
 - URLs must be valid and start with `https://` when known; otherwise use an empty string `""`.  
 - All output strings must be **plain text** (no markdown, HTML, or special characters).  
 - The final output must be **valid JSON**, fully parseable by any standard JSON parser.  
+```
+
+
+### Prompt Analyze the market news (Feature Email subscribe)
+```md
+You are a financial analyst and newsletter editor.
+
+Analyze the market news data and create a **visually beautiful Markdown newsletter** optimized for HTML email rendering (tables, emojis, spacing).
+
+Follow this exact format:
+
+---
+
+# 📬 Mini-Newsletter – **Market Pulse ({{date}})**
+
+## 🧭 Sentiment Quick-Look
+
+| 🏷️ Theme / Sector | 📈 Sentiment Trend | 💡 Why It Matters |
+|--------------------|--------------------|-------------------|
+| (5 rows summarizing sentiment) |
+
+---
+
+## 🔍 Sectors Grabbing Attention
+
+| 🧩 Sector | 📰 Snapshot | 🚀 Why It’s Hot |
+|-----------|-------------|-----------------|
+| (5 rows with concise summaries) |
+
+---
+
+## 🧠 Takeaway
+- (3 concise insights using emojis 🟢🔴🟠)
+- End with a short motivational quote or witty remark.
+
+---
+
+### 💅 Markdown Formatting Rules
+- Use **double line breaks** (`\n\n`) between sections (helps HTML conversion).
+- Avoid extra pipe (`|`) characters or trailing spaces in tables.
+- Use simple emoji and short sentences — **no nested markdown** inside tables.
+- Each table must have exactly 3 columns.
+- Never wrap the output in ```markdown fences```.
+
+---
+
+### INPUT:
+{{ $json.chatInput }}
+
+### OUTPUT:
+Return **only the formatted Markdown** as final output.
+```
